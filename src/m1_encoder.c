@@ -7,6 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Buffer size constants */
+#define LINE_BUFFER_MAX 256
+#define MORSE_CODE_MAX 12
+#define TOKEN_MAX 16
+
 static int compareMorseEntry(const void *a, const void *b) {
     const MorseEntry *ea = a;
     const MorseEntry *eb = b;
@@ -23,11 +28,11 @@ int loadMorseTable(AlphabetSet *outAlphabet, size_t maxEntries, const char *data
     outAlphabet->entryCount = 0;
     outAlphabet->enabled = 1;
 
-    char line[256];
+    char line[LINE_BUFFER_MAX];
     while (fgets(line, sizeof(line), f)) {
         if (line[0] == '\0' || line[0] == '#') continue;
         char ch;
-        char morse[12];
+        char morse[MORSE_CODE_MAX];
         if (sscanf(line, " %c | %11[.-] ", &ch, morse) != 2) {
             if (sscanf(line, " %c|%11[.-] ", &ch, morse) != 2) continue;
         }
@@ -74,9 +79,9 @@ int encodeText(const char *input, const AlphabetSet *alphabet, char *outBuf, siz
 
 int decodeMorse(const char *morseInput, const AlphabetSet *alphabet, char *outBuf, size_t outBufSize) {
     if (!morseInput || !alphabet || !outBuf) return ERR_ARG;
-    if (!validateMorseInput(morseInput)) return ERR_ARG;
+    if (validateMorseInput(morseInput) != OK) return ERR_ARG;
     outBuf[0] = '\0';
-    char token[16];
+    char token[TOKEN_MAX];
     const char *start = morseInput;
     while (*start) {
         while (*start == ' ') start++;
@@ -89,7 +94,9 @@ int decodeMorse(const char *morseInput, const AlphabetSet *alphabet, char *outBu
         char *dst = token;
         while (*start && *start != ' ' && *start != '/') {
             *dst++ = *start++;
-            if ((size_t)(dst - token) >= sizeof(token) - 1) break;
+            if ((size_t)(dst - token) >= sizeof(token) - 1) {
+                return ERR_ARG; /* Invalid morse token (too long) */
+            }
         }
         *dst = '\0';
         if (token[0] == '\0') continue;
@@ -102,11 +109,14 @@ int decodeMorse(const char *morseInput, const AlphabetSet *alphabet, char *outBu
 }
 
 int validateMorseInput(const char *morseInput) {
-    if (!morseInput) return 0;
+    if (!morseInput) return ERR_ARG;
+    if (morseInput[0] == '\0') return ERR_ARG;
     for (const char *p = morseInput; *p; ++p) {
-        if (*p != '.' && *p != '-' && *p != '/' && *p != ' ' && *p != '\n' && *p != '\r' && *p != '\t') return 0;
+        if (*p != '.' && *p != '-' && *p != '/' && *p != ' ' && *p != '\n' && *p != '\r' && *p != '\t') {
+            return ERR_ARG;
+        }
     }
-    return 1;
+    return OK;
 }
 
 int lookupCharacter(const MorseEntry *table, int tableLen, char ch) {
