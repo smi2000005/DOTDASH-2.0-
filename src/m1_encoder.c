@@ -123,7 +123,6 @@ int lookupCharacter(const MorseEntry *table, int tableLen, char ch) {
     }
     return -1;
 }
-
 const char *getMorseForChar(const AlphabetSet *alphabet, char ch) {
     if (!alphabet) return NULL;
     int idx = lookupCharacter(alphabet->entries, alphabet->entryCount, ch);
