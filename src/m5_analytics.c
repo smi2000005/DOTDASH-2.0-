@@ -17,61 +17,6 @@
 #include "m5_analytics.h"
 #include "utils.h"
 
-
-static void dotDash(){
-    SetConsoleCP(CP_UTF8);
-    SetConsoleOutputCP(CP_UTF8);
-
-    char dotDash[1000] =  "\n\n\n\t\t\t\t\t██████╗  ██████╗ ████████╗      ██████╗  █████╗ ███████╗██╗  ██╗\n"
-                                "\t\t\t\t\t██╔══██╗██╔═══██╗╚══██╔══╝      ██╔══██╗██╔══██╗██╔════╝██║  ██║\n"
-                                "\t\t\t\t\t██║  ██║██║   ██║   ██║         ██║  ██║███████║███████╗███████║\n"
-                                "\t\t\t\t\t██║  ██║██║   ██║   ██║         ██║  ██║██╔══██║╚════██║██╔══██║\n"
-                                "\t\t\t\t\t██████╔╝╚██████╔╝   ██║         ██████╔╝██║  ██║███████║██║  ██║\n"
-                                "\t\t\t\t\t╚═════╝  ╚═════╝    ╚═╝         ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝\n";
-    
-    system("cls");
-
-    PlaySound("intro.wav", NULL, SND_ASYNC | SND_FILENAME);
-
-    printf("\x1b[38;2;80;80;80m%s\x1b[0m", dotDash);
-    fflush(stdout);
-    Sleep(1000);
-    system("cls");
-
-    printf("\r\x1b[38;2;138;138;138m%s\x1b[0m", dotDash);
-    fflush(stdout);
-    Sleep(1000);
-    system("cls");
-
-    printf("\r\x1b[38;2;196;196;196m%s\x1b[0m", dotDash);
-    fflush(stdout);
-    Sleep(1000);
-    system("cls");
-
-    printf("\r\x1b[38;2;255;255;255m%s\x1b[0m", dotDash);
-    fflush(stdout);
-    Sleep(2000);
-}
-
-static void loadingBar() {
-    int width = 50;
-
-    for (int i = 0; i <= width; i++) {
-
-        printf("\r\t\t\t\t\t  [");
-
-        for (int j = 0; j < width; j++) {
-            printf(j < i ? "█" : "░");
-        }
-
-        printf("] %3d%%", i * 100 / width);
-        fflush(stdout);
-
-        Sleep(5000 / width);
-    }
-    Sleep(1000);
-}
-
 static void promptString(const char *prompt, char *buf, size_t len) {
     printf("%s", prompt);
     if (!fgets(buf, (int)len, stdin)) {
