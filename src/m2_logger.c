@@ -138,3 +138,4 @@ int clearOldLogs(SessionLog *logs, size_t *logCount, int daysThreshold) {
     *logCount = writeIndex;
     return OK;
 }
+
