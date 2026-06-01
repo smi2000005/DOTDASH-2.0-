@@ -1,12 +1,20 @@
+#ifndef _WIN32
+#define _POSIX_C_SOURCE 199309L
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <windows.h>
+#include <time.h>
+
+#ifdef _WIN32
 #include <windows.h>
 #include <mmsystem.h>
-
 #pragma comment(lib, "winmm.lib")
+#else
+#include <unistd.h>
+#endif
 
 #include "../include/types.h"
 #include "../include/errors.h"
@@ -18,58 +26,83 @@
 #include "utils.h"
 
 
-static void dotDash(){
-    SetConsoleCP(CP_UTF8);
-    SetConsoleOutputCP(CP_UTF8);
-
-    char dotDash[1000] =  "\n\n\n\t\t\t\t\t██████╗  ██████╗ ████████╗      ██████╗  █████╗ ███████╗██╗  ██╗\n"
-                                "\t\t\t\t\t██╔══██╗██╔═══██╗╚══██╔══╝      ██╔══██╗██╔══██╗██╔════╝██║  ██║\n"
-                                "\t\t\t\t\t██║  ██║██║   ██║   ██║         ██║  ██║███████║███████╗███████║\n"
-                                "\t\t\t\t\t██║  ██║██║   ██║   ██║         ██║  ██║██╔══██║╚════██║██╔══██║\n"
-                                "\t\t\t\t\t██████╔╝╚██████╔╝   ██║         ██████╔╝██║  ██║███████║██║  ██║\n"
-                                "\t\t\t\t\t╚═════╝  ╚═════╝    ╚═╝         ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝\n";
-    
-    system("cls");
-
-    PlaySound("intro.wav", NULL, SND_ASYNC | SND_FILENAME);
-
-    printf("\x1b[38;2;80;80;80m%s\x1b[0m", dotDash);
-    fflush(stdout);
-    Sleep(1000);
-    system("cls");
-
-    printf("\r\x1b[38;2;138;138;138m%s\x1b[0m", dotDash);
-    fflush(stdout);
-    Sleep(1000);
-    system("cls");
-
-    printf("\r\x1b[38;2;196;196;196m%s\x1b[0m", dotDash);
-    fflush(stdout);
-    Sleep(1000);
-    system("cls");
-
-    printf("\r\x1b[38;2;255;255;255m%s\x1b[0m", dotDash);
-    fflush(stdout);
-    Sleep(2000);
+static void sleepMilliseconds(unsigned int ms) {
+#ifdef _WIN32
+    Sleep(ms);
+#else
+    struct timespec ts;
+    ts.tv_sec = ms / 1000;
+    ts.tv_nsec = (ms % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+#endif
 }
 
-static void loadingBar() {
+static void dotDash(void) {
+#ifdef _WIN32
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
+    const char dotDashLogo[] =
+        "\n\n\n\t\t\t\t\t██████╗  ██████╗ ████████╗      ██████╗  █████╗ ███████╗██╗  ██╗\n"
+        "\t\t\t\t\t██╔══██╗██╔═══██╗╚══██╔══╝      ██╔══██╗██╔══██╗██╔════╝██║  ██║\n"
+        "\t\t\t\t\t██║  ██║██║   ██║   ██║         ██║  ██║███████║███████╗███████║\n"
+        "\t\t\t\t\t██║  ██║██║   ██║   ██║         ██║  ██║██╔══██║╚════██║██╔══██║\n"
+        "\t\t\t\t\t██████╔╝╚██████╔╝   ██║         ██████╔╝██║  ██║███████║██║  ██║\n"
+        "\t\t\t\t\t╚═════╝  ╚═════╝    ╚═╝         ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝\n";
+
+#ifdef _WIN32
+    system("cls");
+    PlaySound("intro.wav", NULL, SND_ASYNC | SND_FILENAME);
+#else
+    system("clear");
+#endif
+
+    printf("\x1b[38;2;80;80;80m%s\x1b[0m", dotDashLogo);
+    fflush(stdout);
+    sleepMilliseconds(1000);
+
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+    printf("\r\x1b[38;2;138;138;138m%s\x1b[0m", dotDashLogo);
+    fflush(stdout);
+    sleepMilliseconds(1000);
+
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+    printf("\r\x1b[38;2;196;196;196m%s\x1b[0m", dotDashLogo);
+    fflush(stdout);
+    sleepMilliseconds(1000);
+
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+    printf("\r\x1b[38;2;255;255;255m%s\x1b[0m", dotDashLogo);
+    fflush(stdout);
+    sleepMilliseconds(2000);
+}
+
+static void loadingBar(void) {
     int width = 50;
 
     for (int i = 0; i <= width; i++) {
-
         printf("\r\t\t\t\t\t  [");
-
         for (int j = 0; j < width; j++) {
             printf(j < i ? "█" : "░");
         }
-
         printf("] %3d%%", i * 100 / width);
         fflush(stdout);
-
-        Sleep(5000 / width);
+        sleepMilliseconds(5000 / width);
     }
-    Sleep(1000);
+    sleepMilliseconds(1000);
 }
 
 static void promptString(const char *prompt, char *buf, size_t len) {
@@ -148,7 +181,11 @@ int main(void) {
     while (1) {
         showMainMenu(currentUsername, activeAlphabet.name);
         int choice = promptInt("Enter choice: ");
+#ifdef _WIN32
         system("cls");
+#else
+        system("clear");
+#endif
 
         if (choice == 0) {
             saveLogsToFile(logs, logCount, "data/sessions.txt");

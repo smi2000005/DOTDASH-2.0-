@@ -119,17 +119,20 @@ int validateMorseInput(const char *morseInput) {
     return OK;
 }
 
-int lookupCharacter(const MorseEntry *table, int tableLen, char ch) {
-    if (!table || tableLen <= 0) return -1;
+int lookupCharacter(const MorseEntry *table, size_t tableLen, char ch) {
+    if (!table || tableLen == 0) return -1;
     ch = (char)toupper((unsigned char)ch);
-    int low = 0;
-    int high = tableLen - 1;
+    size_t low = 0;
+    size_t high = tableLen - 1;
     while (low <= high) {
-        int mid = (low + high) / 2;
+        size_t mid = (low + high) / 2;
         char mc = table[mid].character;
-        if (mc == ch) return mid;
+        if (mc == ch) return (int)mid;
         if (mc < ch) low = mid + 1;
-        else high = mid - 1;
+        else {
+            if (mid == 0) break;
+            high = mid - 1;
+        }
     }
     return -1;
 }
